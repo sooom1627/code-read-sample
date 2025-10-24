@@ -41,11 +41,24 @@ export default function BarcodeScanner({ onScan, isActive }: BarcodeScannerProps
           return;
         }
 
-        // 背面カメラを優先的に選択
-        const selectedDevice = videoInputDevices.find(device => 
-          device.label.toLowerCase().includes('back') || 
-          device.label.toLowerCase().includes('rear')
-        ) || videoInputDevices[0];
+        // 背面カメラを優先的に選択（複数の条件でチェック）
+        let selectedDevice = videoInputDevices.find(device => {
+          const label = device.label.toLowerCase();
+          return label.includes('back') || 
+                 label.includes('rear') || 
+                 label.includes('environment') ||
+                 label.includes('背面');
+        });
+
+        // 見つからない場合は最後のデバイスを選択（通常、背面カメラは後方にリストされる）
+        if (!selectedDevice && videoInputDevices.length > 1) {
+          selectedDevice = videoInputDevices[videoInputDevices.length - 1];
+        }
+        
+        // それでもなければ最初のデバイス
+        if (!selectedDevice) {
+          selectedDevice = videoInputDevices[0];
+        }
 
         setIsLoading(false);
 
@@ -85,7 +98,7 @@ export default function BarcodeScanner({ onScan, isActive }: BarcodeScannerProps
   }
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl">
+    <div className="relative w-full aspect-video bg-black rounded-3xl overflow-hidden border-2 border-zinc-800 shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]">
       <video
         ref={videoRef}
         className="w-full h-full object-cover"
@@ -94,33 +107,62 @@ export default function BarcodeScanner({ onScan, isActive }: BarcodeScannerProps
       
       {/* スキャンエリアのオーバーレイ */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="relative w-4/5 aspect-square max-w-sm">
-          {/* コーナーデザイン */}
-          <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-blue-500 rounded-tl-xl"></div>
-          <div className="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-blue-500 rounded-tr-xl"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-blue-500 rounded-bl-xl"></div>
-          <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-blue-500 rounded-br-xl"></div>
+        {/* 暗いオーバーレイ */}
+        <div className="absolute inset-0 bg-black/40"></div>
+        
+        {/* バーコードスキャンエリア - 横長 */}
+        <div className="relative z-10 w-[85%] h-32">
+          {/* メインスキャンエリア */}
+          <div className="absolute inset-0 border-2 border-blue-400 rounded-xl bg-blue-500/5 backdrop-blur-sm">
+            {/* コーナーマーカー */}
+            <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>
+            <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-blue-400 rounded-tr-lg"></div>
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-blue-400 rounded-bl-lg"></div>
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-blue-400 rounded-br-lg"></div>
+          </div>
           
-          {/* スキャンライン */}
-          <div className="absolute inset-x-0 top-1/2 h-0.5 bg-linear-to-r from-transparent via-blue-400 to-transparent animate-pulse"></div>
+          {/* アニメーションスキャンライン */}
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-blue-400 shadow-[0_0_10px_2px_rgba(59,130,246,0.8)] animate-scan-line"></div>
+          
+          {/* バーコードのガイドライン */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1 opacity-20">
+            <div className="w-1 h-20 bg-white rounded-full"></div>
+            <div className="w-0.5 h-20 bg-white rounded-full"></div>
+            <div className="w-1.5 h-20 bg-white rounded-full"></div>
+            <div className="w-0.5 h-20 bg-white rounded-full"></div>
+            <div className="w-2 h-20 bg-white rounded-full"></div>
+            <div className="w-1 h-20 bg-white rounded-full"></div>
+            <div className="w-0.5 h-20 bg-white rounded-full"></div>
+            <div className="w-1.5 h-20 bg-white rounded-full"></div>
+          </div>
         </div>
       </div>
 
       {/* ローディング表示 */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-            <p className="text-white font-medium">カメラを起動中...</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500/30 border-t-blue-500"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-full"></div>
+              </div>
+            </div>
+            <p className="text-zinc-300 font-semibold text-lg">カメラを起動中...</p>
           </div>
         </div>
       )}
 
       {/* エラー表示 */}
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75">
-          <div className="bg-red-500 text-white px-6 py-4 rounded-xl shadow-lg max-w-sm mx-4 text-center">
-            <p className="font-medium">{error}</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-red-500/10 border-2 border-red-500 text-red-300 px-8 py-6 rounded-2xl shadow-2xl max-w-sm mx-4 text-center backdrop-blur-xl">
+            <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="font-semibold">{error}</p>
           </div>
         </div>
       )}

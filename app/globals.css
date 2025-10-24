@@ -52,3 +52,19 @@ body {
     background: #52525b;
   }
 }
+
+/* スキャンラインアニメーション */
+@keyframes scan-line {
+  0%, 100% {
+    transform: translateY(-50%) scaleX(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-50%) scaleX(1);
+    opacity: 1;
+  }
+}
+
+.animate-scan-line {
+  animation: scan-line 2s ease-in-out infinite;
+}
