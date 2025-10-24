@@ -21,10 +21,8 @@ export default function Home() {
       id: `${Date.now()}-${Math.random()}`,
     };
     setScanHistory(prev => [newRecord, ...prev]);
-    // スキャン後、少し待ってからカメラを停止
-    setTimeout(() => {
-      setIsScannerActive(false);
-    }, 500);
+    // スキャン成功後、即座にスキャナーを停止
+    setIsScannerActive(false);
   };
 
   return (

@@ -62,16 +62,17 @@ export default function BarcodeScanner({ onScan, isActive }: BarcodeScannerProps
 
         setIsLoading(false);
 
-        // バーコードスキャンを開始
+        // バーコードスキャンを開始（1回のみ）
+        let hasScanned = false;
         await codeReader.decodeFromVideoDevice(
           selectedDevice.deviceId,
           videoRef.current!,
           (result, error) => {
-            if (result) {
+            if (result && !hasScanned) {
+              hasScanned = true;
+              // スキャン成功したらすぐにカメラを停止
+              codeReader.reset();
               onScan(result.getText());
-              // スキャン成功時の音声フィードバック
-              const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZTA0PVqzn77BdGAg+ltryxnUrBSh+zPDZjj0HGmS56uihUBELTKXh8bllHAU2jdXzzn0pBSd6yO/dkUM=');
-              audio.play().catch(() => {});
             }
             if (error && !(error instanceof NotFoundException)) {
               console.error(error);
