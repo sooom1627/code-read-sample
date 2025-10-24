@@ -107,13 +107,22 @@ export default function BarcodeScanner({ onScan, isActive }: BarcodeScannerProps
       
       {/* スキャンエリアのオーバーレイ */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {/* 暗いオーバーレイ */}
-        <div className="absolute inset-0 bg-black/40"></div>
+        {/* 上下左右の暗いオーバーレイ（スキャンエリアは除外） */}
+        <div className="absolute inset-0">
+          {/* 上部 */}
+          <div className="absolute top-0 left-0 right-0 h-[calc(50%-64px)] bg-black/50"></div>
+          {/* 下部 */}
+          <div className="absolute bottom-0 left-0 right-0 h-[calc(50%-64px)] bg-black/50"></div>
+          {/* 左側 */}
+          <div className="absolute top-[calc(50%-64px)] bottom-[calc(50%-64px)] left-0 w-[7.5%] bg-black/50"></div>
+          {/* 右側 */}
+          <div className="absolute top-[calc(50%-64px)] bottom-[calc(50%-64px)] right-0 w-[7.5%] bg-black/50"></div>
+        </div>
         
-        {/* バーコードスキャンエリア - 横長 */}
+        {/* バーコードスキャンエリア - 横長（クリアな状態） */}
         <div className="relative z-10 w-[85%] h-32">
-          {/* メインスキャンエリア */}
-          <div className="absolute inset-0 border-2 border-blue-400 rounded-xl bg-blue-500/5 backdrop-blur-sm">
+          {/* メインスキャンエリアの枠 */}
+          <div className="absolute inset-0 border-2 border-blue-400 rounded-xl">
             {/* コーナーマーカー */}
             <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-blue-400 rounded-tl-lg"></div>
             <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-blue-400 rounded-tr-lg"></div>
@@ -123,18 +132,6 @@ export default function BarcodeScanner({ onScan, isActive }: BarcodeScannerProps
           
           {/* アニメーションスキャンライン */}
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-blue-400 shadow-[0_0_10px_2px_rgba(59,130,246,0.8)] animate-scan-line"></div>
-          
-          {/* バーコードのガイドライン */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex gap-1 opacity-20">
-            <div className="w-1 h-20 bg-white rounded-full"></div>
-            <div className="w-0.5 h-20 bg-white rounded-full"></div>
-            <div className="w-1.5 h-20 bg-white rounded-full"></div>
-            <div className="w-0.5 h-20 bg-white rounded-full"></div>
-            <div className="w-2 h-20 bg-white rounded-full"></div>
-            <div className="w-1 h-20 bg-white rounded-full"></div>
-            <div className="w-0.5 h-20 bg-white rounded-full"></div>
-            <div className="w-1.5 h-20 bg-white rounded-full"></div>
-          </div>
         </div>
       </div>
 
